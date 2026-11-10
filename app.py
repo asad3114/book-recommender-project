@@ -164,21 +164,18 @@ st.sidebar.header("Configuration")
 top_n = st.sidebar.slider("Number of recommendations", min_value=1, max_value=10, value=5)
 
 st.sidebar.header("Filters")
-# Extract unique genres and authors from the dataset
 all_genres = sorted(list(set(b.genre for b in recommender.books if b.genre)))
 all_authors = sorted(list(set(b.author for b in recommender.books if b.author)))
 
 selected_genres = st.sidebar.multiselect("Filter by Genre", all_genres)
 selected_authors = st.sidebar.multiselect("Filter by Author", all_authors)
 
-# Filter books dynamically based on sidebar choices
 filtered_books = recommender.books
 if selected_genres:
     filtered_books = [b for b in filtered_books if b.genre in selected_genres]
 if selected_authors:
     filtered_books = [b for b in filtered_books if b.author in selected_authors]
 
-# Dropdown selection sorted alphabetically by title from the filtered list
 book_titles = sorted([book.title for book in filtered_books])
 
 if not book_titles:
@@ -208,9 +205,17 @@ if selected_title:
             if selected_book.description:
                 st.write(selected_book.description)
 
+        # External Reading Links for Selected Book
+        sel_query = quote(f"{selected_book.title} {selected_book.author}")
+        b_col1, b_col2 = st.columns(2)
+        with b_col1:
+            st.link_button("📚 View on Goodreads", f"https://www.goodreads.com/search?q={sel_query}", use_container_width=True)
+        with b_col2:
+            st.link_button("📖 Read/Search Open Library", f"https://openlibrary.org/search?q={sel_query}", use_container_width=True)
+
     st.divider()
 
-    # Get and display recommendations with covers
+    # Get and display recommendations with covers & interactive read buttons
     st.markdown(f"### Recommended Reads (Top {top_n})")
     recommendations = recommender.recommend(selected_index, count=top_n)
 
@@ -234,4 +239,13 @@ if selected_title:
                         st.write(rec_book.description)
                 with col3:
                     st.metric(label="Match", value=f"{similarity:.1f}%")
+                
+                # Recommendation action buttons
+                rec_query = quote(f"{rec_book.title} {rec_book.author}")
+                r_col1, r_col2 = st.columns(2)
+                with r_col1:
+                    st.link_button("📚 Goodreads", f"https://www.goodreads.com/search?q={rec_query}", use_container_width=True)
+                with r_col2:
+                    st.link_button("📖 Open Library", f"https://openlibrary.org/search?q={rec_query}", use_container_width=True)
+
                 st.markdown("---")
